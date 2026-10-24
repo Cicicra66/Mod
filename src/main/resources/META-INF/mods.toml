@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="MIT"
+[[mods]]
+modId="esperandojugadores"
+version="1.0.0"
+displayName="Esperando Jugadores"
+authors="sebas"
+description='''Pantalla sencilla para esperar jugadores.'''
+[[dependencies.esperandojugadores]]
+modId="forge"
+mandatory=true
+versionRange="[43,)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.esperandojugadores]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.2,1.20)"
+ordering="NONE"
+side="CLIENT"
