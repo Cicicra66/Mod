@@ -24,6 +24,8 @@ public final class ClientEvents {
     );
 
     private static boolean waitingScreenOpenedForConnection = false;
+    private static int ticksAfterWorldReady = 0;
+    private static final int TICKS_BEFORE_OPEN = 20;
 
     private ClientEvents() {}
 
@@ -37,17 +39,18 @@ public final class ClientEvents {
         }
     }
 
-    // Open the screen directly when the client finishes connecting to a server.
+    // Mark a new connection as pending. Do not set the screen here because Minecraft's
+    // join/loading flow may replace it immediately after this event.
     @SubscribeEvent
     public static void onLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
-        Minecraft mc = Minecraft.getInstance();
-        waitingScreenOpenedForConnection = true;
-        mc.setScreen(new WaitingPlayersScreen());
+        waitingScreenOpenedForConnection = false;
+        ticksAfterWorldReady = 0;
     }
 
     @SubscribeEvent
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         waitingScreenOpenedForConnection = false;
+        ticksAfterWorldReady = 0;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof WaitingPlayersScreen) {
             mc.setScreen(null);
@@ -60,16 +63,20 @@ public final class ClientEvents {
 
         Minecraft mc = Minecraft.getInstance();
 
-        // Reset the flag after leaving a world or server.
+        // Wait until the player, world and network connection are all ready.
         if (mc.player == null || mc.level == null || mc.getConnection() == null) {
             waitingScreenOpenedForConnection = false;
+            ticksAfterWorldReady = 0;
             return;
         }
 
-        // Fallback in case the login event happened before the world was ready.
+        // Allow Minecraft to finish its join/loading screens before opening ours.
         if (!waitingScreenOpenedForConnection) {
-            waitingScreenOpenedForConnection = true;
-            mc.setScreen(new WaitingPlayersScreen());
+            ticksAfterWorldReady++;
+            if (ticksAfterWorldReady >= TICKS_BEFORE_OPEN) {
+                mc.setScreen(new WaitingPlayersScreen());
+                waitingScreenOpenedForConnection = true;
+            }
         }
 
         // F6 hides the screen or brings it back.
