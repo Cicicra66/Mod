@@ -10,9 +10,9 @@ public class WaitingPlayersScreen extends Screen {
     private static final int PURPLE_BAR = 0xFF9870C9, PANEL = 0xEE17141B, TEXT = 0xFFF1EAF4;
     public WaitingPlayersScreen() { super(Component.literal("Esperando jugadores")); }
     @Override protected void init() {
-        addRenderableWidget(Button.builder(Component.literal("Cerrar"),
-            button -> Minecraft.getInstance().setScreen(null))
-            .bounds(width / 2 - 50, height / 2 + 58, 100, 20).build());
+        addRenderableWidget(new Button(width / 2 - 50, height / 2 + 58, 100, 20,
+            Component.literal("Cerrar"),
+            button -> Minecraft.getInstance().setScreen(null)));
     }
     @Override public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         renderBackground(poseStack);
