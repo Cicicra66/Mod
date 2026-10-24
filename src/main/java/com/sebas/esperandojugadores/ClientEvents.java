@@ -42,14 +42,14 @@ public final class ClientEvents {
 
         Minecraft mc = Minecraft.getInstance();
 
-        // Reset the auto-open flag after leaving a world or server.
+        // Reset the flag after leaving a world or server.
         if (mc.player == null || mc.level == null || mc.getConnection() == null) {
             waitingScreenOpenedForConnection = false;
             return;
         }
 
-        // Open automatically once on each multiplayer server connection.
-        if (mc.getConnection().getServerData() != null && !waitingScreenOpenedForConnection) {
+        // Open once when a player finishes entering a world/server.
+        if (!waitingScreenOpenedForConnection) {
             waitingScreenOpenedForConnection = true;
             mc.setScreen(new WaitingPlayersScreen());
         }
