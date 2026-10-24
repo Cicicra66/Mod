@@ -5,6 +5,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,6 +37,23 @@ public final class ClientEvents {
         }
     }
 
+    // Open the screen directly when the client finishes connecting to a server.
+    @SubscribeEvent
+    public static void onLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        Minecraft mc = Minecraft.getInstance();
+        waitingScreenOpenedForConnection = true;
+        mc.setScreen(new WaitingPlayersScreen());
+    }
+
+    @SubscribeEvent
+    public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        waitingScreenOpenedForConnection = false;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof WaitingPlayersScreen) {
+            mc.setScreen(null);
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -48,7 +66,7 @@ public final class ClientEvents {
             return;
         }
 
-        // Open once when a player finishes entering a world/server.
+        // Fallback in case the login event happened before the world was ready.
         if (!waitingScreenOpenedForConnection) {
             waitingScreenOpenedForConnection = true;
             mc.setScreen(new WaitingPlayersScreen());
